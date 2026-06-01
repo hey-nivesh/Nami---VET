@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════
+   Export Modal Styles
+   ═══════════════════════════════════════════ */
+
+.export-modal {
+  max-width: 440px;
+}
+
+.export-field {
+  margin-bottom: 18px;
+}
+
+.export-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.export-options {
+  display: flex;
+  gap: 6px;
+}
+
+.export-option {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms;
+  text-align: center;
+}
+
+.export-option:hover {
+  border-color: rgba(255, 140, 0, 0.3);
+}
+
+.export-option.active {
+  border-color: var(--accent-primary);
+  background: rgba(255, 140, 0, 0.1);
+  color: var(--accent-primary);
+}
+
+/* ── Progress ── */
+.export-progress-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.export-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.export-progress-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: var(--radius-full);
+  transition: width 300ms ease;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+}
+
+/* ── Completed ── */
+.export-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.export-check {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(76, 175, 80, 0.15);
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.w-full {
+  width: 100%;
+}

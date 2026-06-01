@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════
+   Top Bar Styles
+   ═══════════════════════════════════════════ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-height);
+  background: var(--bg-app);
+  border-bottom: 0.5px solid var(--border-color);
+  padding: 0 12px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.topbar-left,
+.topbar-center,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-left { flex: 1; }
+.topbar-right { flex: 1; justify-content: flex-end; }
+
+/* Logo */
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+
+/* Project name */
+.topbar-project-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 150ms;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-project-name:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.topbar-name-input {
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--accent-primary);
+  border-radius: 4px;
+  padding: 2px 8px;
+  outline: none;
+  width: 180px;
+}
+
+/* Auto-save */
+.topbar-autosave {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+}
+
+.topbar-autosave-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background 300ms;
+}
+
+.topbar-autosave.saving .topbar-autosave-dot {
+  background: var(--accent-primary);
+  animation: pulseGlow 1s ease-in-out infinite;
+}
+
+.topbar-autosave.saved .topbar-autosave-dot {
+  background: #4CAF50;
+}
+
+.topbar-autosave.error .topbar-autosave-dot {
+  background: var(--accent-danger);
+}
+
+.topbar-autosave-text {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.topbar-autosave.saving .topbar-autosave-text {
+  color: var(--accent-primary);
+}
+
+/* Separator */
+.topbar-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 4px;
+}
+
+/* Render button */
+.topbar-render-btn {
+  font-size: 12px;
+  padding: 4px 14px;
+}
+
+/* Avatar */
+.topbar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.topbar-avatar:hover {
+  border-color: var(--accent-primary);
+}

@@ -1,0 +1,168 @@
+/* ═══════════════════════════════════════════
+   Properties Panel Styles
+   ═══════════════════════════════════════════ */
+
+.properties-panel {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.properties-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.properties-clip-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--border-color);
+}
+
+.properties-clip-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.properties-clip-type {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 140, 0, 0.12);
+  color: var(--accent-primary);
+  text-transform: capitalize;
+}
+
+/* ── Sections ── */
+.properties-section {
+  border-bottom: 0.5px solid var(--border-color);
+}
+
+.properties-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.properties-section-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.properties-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.properties-section-toggle span {
+  color: var(--text-primary);
+}
+
+.properties-checkbox {
+  accent-color: var(--accent-primary);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.properties-section-body {
+  padding: 4px 12px 10px;
+}
+
+/* ── Property Row ── */
+.property-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  gap: 8px;
+}
+
+.property-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.property-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.property-slider {
+  flex: 1;
+  height: 3px;
+}
+
+.property-number {
+  width: 48px;
+  padding: 3px 5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: right;
+  outline: none;
+}
+
+.property-number:focus {
+  border-color: var(--accent-primary);
+}
+
+/* Remove spinner arrows */
+.property-number::-webkit-outer-spin-button,
+.property-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.property-suffix {
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: 14px;
+}
+
+.property-select {
+  flex: 1;
+  padding: 4px 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.property-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.property-select option {
+  background: var(--bg-panel);
+}

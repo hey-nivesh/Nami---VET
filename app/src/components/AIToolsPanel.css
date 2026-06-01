@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════
+   AI Tools Panel Styles
+   ═══════════════════════════════════════════ */
+
+.ai-tools-panel {
+  border-top: 0.5px solid var(--border-color);
+}
+
+.ai-tools-header {
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--border-color);
+}
+
+.ai-tools-header h3 {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ai-tools-list {
+  padding: 4px;
+}
+
+.ai-tool-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.ai-tool-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: var(--accent-primary);
+}
+
+.ai-tool-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-tool-btn.loading {
+  border-left-color: var(--accent-primary);
+}
+
+.ai-tool-label {
+  flex: 1;
+  text-align: left;
+}
+
+.ai-tool-result {
+  padding: 4px 12px 4px 36px;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.ai-tool-result.success {
+  color: #4CAF50;
+}
+
+.ai-tool-result.error {
+  color: var(--accent-danger);
+}
+
+.ai-tool-result.warning {
+  color: var(--accent-gold);
+}
