@@ -32,6 +32,17 @@ export interface Clip {
   muted?: boolean;
   speed?: number;
   reverse?: boolean;
+  opacity?: number;
+  blendMode?: string;
+  posX?: number;
+  posY?: number;
+  scaleX?: number;
+  scaleY?: number;
+  rotation?: number;
+  cropLeft?: number;
+  cropRight?: number;
+  cropTop?: number;
+  cropBottom?: number;
 }
 
 export interface Track {
@@ -346,6 +357,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
   // ── Sync / Real-time actions ──
 
   updateClip: (clipId, changes) => {
+    const { saveTimeline } = get();
     set((state) => {
       const newTracks = state.tracks.map((t) => ({
         ...t,
@@ -355,9 +367,11 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       }));
       return { tracks: newTracks, duration: calcDuration(newTracks) };
     });
+    debouncedSave(saveTimeline);
   },
 
   addEffectToClip: (clipId, effect) => {
+    const { saveTimeline } = get();
     set((state) => {
       const newTracks = state.tracks.map((t) => ({
         ...t,
@@ -374,9 +388,11 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       }));
       return { tracks: newTracks };
     });
+    debouncedSave(saveTimeline);
   },
 
   removeEffectFromClip: (clipId, effectType) => {
+    const { saveTimeline } = get();
     set((state) => {
       const newTracks = state.tracks.map((t) => ({
         ...t,
@@ -392,6 +408,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       }));
       return { tracks: newTracks };
     });
+    debouncedSave(saveTimeline);
   },
 
   setTracks: (tracks, duration) => {
