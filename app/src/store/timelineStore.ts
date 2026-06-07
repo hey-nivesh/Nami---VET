@@ -32,17 +32,19 @@ export interface Clip {
   muted?: boolean;
   speed?: number;
   reverse?: boolean;
-  opacity?: number;
-  blendMode?: string;
-  posX?: number;
-  posY?: number;
-  scaleX?: number;
+  opacity?: number;         // 0–100
+  blendMode?: string;       // 'normal' | 'multiply' | 'screen' | 'overlay' | 'soft-light'
+  posX?: number;            // Horizontal offset in % of canvas width  (0 = centered)
+  posY?: number;            // Vertical offset in % of canvas height   (0 = centered)
+  scaleX?: number;          // Scale percentage (100 = original size)
   scaleY?: number;
-  rotation?: number;
-  cropLeft?: number;
+  rotation?: number;        // Degrees
+  cropLeft?: number;        // Crop % (0-50)
   cropRight?: number;
   cropTop?: number;
   cropBottom?: number;
+  zIndex?: number;          // Layer order (higher number = rendered on top)
+  isImage?: boolean;        // True for still images
 }
 
 export interface Track {
@@ -81,9 +83,13 @@ interface TimelineState {
   removeClip: (clipId: string) => void;
   moveClip: (clipId: string, newStartTime: number) => void;
   splitClip: (clipId: string, atTime: number) => void;
-  trimClip: (clipId: string, newInPoint: number, newOutPoint: number) => void;
+  trimClip: (clipId: string, newInPoint: number, newOutPoint: number, newStartTime?: number) => void;
   selectClip: (clipId: string | null) => void;
   getSelectedClip: () => Clip | null;
+  // Layer ordering
+  moveToTrack: (clipId: string, targetTrackId: string, newStartTime: number) => void;
+  sendClipForward: (clipId: string) => void;
+  sendClipBackward: (clipId: string) => void;
 
   // Sync / Real-time actions
   updateClip: (clipId: string, changes: Partial<Clip>) => void;
@@ -320,22 +326,24 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     debouncedSave(saveTimeline);
   },
 
-  trimClip: (clipId, newInPoint, newOutPoint) => {
+  trimClip: (clipId, newInPoint, newOutPoint, newStartTime?) => {
     const { pushUndo, saveTimeline } = get();
     pushUndo('Trimmed Clip');
     set((state) => {
       const newTracks = state.tracks.map((t) => ({
         ...t,
-        clips: t.clips.map((c) =>
-          c.id === clipId
-            ? {
-                ...c,
-                inPoint: newInPoint,
-                outPoint: newOutPoint,
-                duration: newOutPoint - newInPoint,
-              }
-            : c
-        ),
+        clips: t.clips.map((c) => {
+          if (c.id !== clipId) return c;
+          const clampedIn = Math.max(0, newInPoint);
+          const clampedOut = Math.max(clampedIn + 0.1, newOutPoint);
+          return {
+            ...c,
+            inPoint: clampedIn,
+            outPoint: clampedOut,
+            duration: clampedOut - clampedIn,
+            startTime: newStartTime !== undefined ? Math.max(0, newStartTime) : c.startTime,
+          };
+        }),
       }));
       return { tracks: newTracks, duration: calcDuration(newTracks) };
     });
@@ -352,6 +360,59 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       if (clip) return clip;
     }
     return null;
+  },
+
+  // ── Layer ordering ──
+
+  moveToTrack: (clipId, targetTrackId, newStartTime) => {
+    const { pushUndo, saveTimeline } = get();
+    pushUndo('Moved Clip to Track');
+    set((state) => {
+      let clipToMove: Clip | null = null;
+      const withoutClip = state.tracks.map((t) => {
+        const found = t.clips.find((c) => c.id === clipId);
+        if (found) clipToMove = { ...found, startTime: Math.max(0, newStartTime) };
+        return { ...t, clips: t.clips.filter((c) => c.id !== clipId) };
+      });
+      if (!clipToMove) return {};
+      const newTracks = withoutClip.map((t) =>
+        t.id === targetTrackId ? { ...t, clips: [...t.clips, clipToMove!] } : t
+      );
+      return { tracks: newTracks, duration: calcDuration(newTracks) };
+    });
+    debouncedSave(saveTimeline);
+  },
+
+  sendClipForward: (clipId) => {
+    const { pushUndo, saveTimeline } = get();
+    pushUndo('Send Clip Forward');
+    set((state) => {
+      const newTracks = state.tracks.map((t) => {
+        const idx = t.clips.findIndex((c) => c.id === clipId);
+        if (idx === -1 || idx >= t.clips.length - 1) return t;
+        const clips = [...t.clips];
+        [clips[idx], clips[idx + 1]] = [clips[idx + 1], clips[idx]];
+        return { ...t, clips };
+      });
+      return { tracks: newTracks };
+    });
+    debouncedSave(saveTimeline);
+  },
+
+  sendClipBackward: (clipId) => {
+    const { pushUndo, saveTimeline } = get();
+    pushUndo('Send Clip Backward');
+    set((state) => {
+      const newTracks = state.tracks.map((t) => {
+        const idx = t.clips.findIndex((c) => c.id === clipId);
+        if (idx <= 0) return t;
+        const clips = [...t.clips];
+        [clips[idx], clips[idx - 1]] = [clips[idx - 1], clips[idx]];
+        return { ...t, clips };
+      });
+      return { tracks: newTracks };
+    });
+    debouncedSave(saveTimeline);
   },
 
   // ── Sync / Real-time actions ──

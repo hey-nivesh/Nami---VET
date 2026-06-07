@@ -80,6 +80,7 @@ export default function MediaBin({ projectId }: MediaBinProps) {
       inPoint: 0,
       outPoint: asset.duration_seconds || 5,
       thumbnailUrl: asset.thumbnail_url || undefined,
+      isImage: asset.media_type === 'image',
     });
   };
 
@@ -123,6 +124,7 @@ export default function MediaBin({ projectId }: MediaBinProps) {
       inPoint: 0,
       outPoint: asset.duration_seconds || 5,
       thumbnailUrl: asset.thumbnail_url || undefined,
+      isImage: asset.media_type === 'image',
     });
   };
 
@@ -200,6 +202,10 @@ function MediaCard({
       className={`media-card ${asset.isLoading ? 'loading' : ''} ${isSelected ? 'selected' : ''}`}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      draggable={!asset.isLoading}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('assetId', asset.id);
+      }}
     >
       <div className="media-card-thumb">
         {asset.isLoading ? (

@@ -1,3 +1,4 @@
+
 /* ═══════════════════════════════════════════
    Video Preview Styles
    ═══════════════════════════════════════════ */
@@ -17,6 +18,7 @@
   position: relative;
   overflow: hidden;
   background: #0A0A0A;
+  
 }
 
 .preview-video,
@@ -106,4 +108,11 @@
 .preview-rate-select option {
   background: var(--bg-panel);
   color: var(--text-primary);
+}
+
+/* ── Fullscreen Style Overrides ── */
+.video-preview:fullscreen {
+  background-color: #000;
+  padding: 0;
+  border: none;
 }

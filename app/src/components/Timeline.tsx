@@ -9,6 +9,7 @@ import {
   IconHistory,
 } from '@tabler/icons-react';
 import { useTimelineStore, type Track, type Clip } from '../store/timelineStore';
+import { useMediaStore } from '../store/mediaStore';
 import { historyManager } from '../engine/HistoryManager';
 import './Timeline.css';
 
@@ -99,6 +100,7 @@ function ClipBlock({
   isSelected,
   onSelect,
   onMove,
+  onTrim,
   onContextMenu,
 }: {
   clip: Clip;
@@ -106,15 +108,24 @@ function ClipBlock({
   isSelected: boolean;
   onSelect: () => void;
   onMove: (newStart: number) => void;
+  onTrim: (newInPoint: number, newOutPoint: number, newStartTime?: number) => void;
   onContextMenu: (e: React.MouseEvent) => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
+  const [dragTooltip, setDragTooltip] = useState<string | null>(null);
   const dragStartRef = useRef({ x: 0, startTime: 0 });
 
   const left = clip.startTime * zoom;
   const width = Math.max(clip.duration * zoom, 20);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = (s % 60).toFixed(1);
+    return `${m}:${sec.padStart(4, '0')}`;
+  };
+
+  // ── Body drag (move) ──
+  const handleBodyMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     e.stopPropagation();
     onSelect();
@@ -123,12 +134,72 @@ function ClipBlock({
 
     const handleMouseMove = (ev: MouseEvent) => {
       const dx = ev.clientX - dragStartRef.current.x;
-      const newStart = Math.max(0, dragStartRef.current.startTime + dx / zoom);
+      let newStart = Math.max(0, dragStartRef.current.startTime + dx / zoom);
+      // Snap to nearest second if within 10px
+      const nearestSec = Math.round(newStart);
+      if (Math.abs(newStart - nearestSec) * zoom < 10) newStart = nearestSec;
       onMove(newStart);
+      setDragTooltip(formatTime(newStart));
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setDragTooltip(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // ── Left handle drag (trim from start — shifts inPoint + startTime) ──
+  const handleLeftTrimMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect();
+    const startX = e.clientX;
+    const origIn = clip.inPoint;
+    const origStart = clip.startTime;
+    const origOut = clip.outPoint;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      const dx = ev.clientX - startX;
+      const delta = dx / zoom;
+      const newIn = Math.max(0, origIn + delta);
+      const newStart = Math.max(0, origStart + delta);
+      if (newIn >= origOut - 0.1) return;
+      onTrim(newIn, origOut, newStart);
+      setDragTooltip(formatTime(newIn));
+    };
+
+    const handleMouseUp = () => {
+      setDragTooltip(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // ── Right handle drag (trim from end — keeps startTime fixed) ──
+  const handleRightTrimMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect();
+    const startX = e.clientX;
+    const origIn = clip.inPoint;
+    const origOut = clip.outPoint;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      const dx = ev.clientX - startX;
+      const delta = dx / zoom;
+      const newOut = Math.max(origIn + 0.1, origOut + delta);
+      onTrim(origIn, newOut);
+      setDragTooltip(formatTime(newOut));
+    };
+
+    const handleMouseUp = () => {
+      setDragTooltip(null);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -148,11 +219,20 @@ function ClipBlock({
     <div
       className={clipClass}
       style={{ left, width }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={handleBodyMouseDown}
       onContextMenu={(e) => { e.preventDefault(); onContextMenu(e); }}
     >
-      <div className="clip-resize-handle left" />
+      {/* Left trim handle */}
+      <div
+        className="clip-resize-handle left"
+        onMouseDown={handleLeftTrimMouseDown}
+        title="Trim start"
+      />
+
       <div className="clip-content">
+        {clip.thumbnailUrl && (
+          <img src={clip.thumbnailUrl} alt="" className="clip-thumb" />
+        )}
         <span className="clip-label">{clip.fileName}</span>
         <span className="clip-duration">
           {Math.floor(clip.duration / 60)}:{Math.floor(clip.duration % 60).toString().padStart(2, '0')}
@@ -164,12 +244,22 @@ function ClipBlock({
         <WaveformBar data={clip.waveformData || []} />
       )}
 
-      {/* Subtitle pattern */}
+      {/* Subtitle text */}
       {clip.type === 'subtitle' && (
         <div className="clip-subtitle-pattern" />
       )}
 
-      <div className="clip-resize-handle right" />
+      {/* Right trim handle */}
+      <div
+        className="clip-resize-handle right"
+        onMouseDown={handleRightTrimMouseDown}
+        title="Trim end"
+      />
+
+      {/* Drag tooltip */}
+      {dragTooltip && (
+        <div className="clip-drag-tooltip">{dragTooltip}</div>
+      )}
     </div>
   );
 }
@@ -277,15 +367,18 @@ export default function Timeline() {
     isPlaying,
     duration,
     addTrack,
+    addClip,
     selectClip,
     moveClip,
     removeClip,
     splitClip,
+    trimClip,
     setPlayheadPosition,
     setIsPlaying,
     setZoom,
   } = useTimelineStore();
 
+  const { assets } = useMediaStore();
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -408,7 +501,37 @@ export default function Timeline() {
           {/* Tracks */}
           <div className="timeline-tracks" style={{ width: totalWidth, height: trackAreaHeight }}>
             {tracks.map((track, trackIndex) => (
-              <div key={track.id} className="timeline-track" style={{ top: trackIndex * 56 }}>
+              <div
+                key={track.id}
+                className="timeline-track"
+                style={{ top: trackIndex * 56 }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const assetId = e.dataTransfer.getData('assetId');
+                  if (!assetId) return;
+                  const asset = assets.find((a) => a.id === assetId);
+                  if (!asset || track.locked) return;
+                  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                  const dropX = e.clientX - rect.left + scrollLeft;
+                  let startTime = Math.max(0, dropX / zoom);
+                  // Snap to nearest second if within 10px
+                  const nearestSec = Math.round(startTime);
+                  if (Math.abs(startTime - nearestSec) * zoom < 10) startTime = nearestSec;
+                  addClip(track.id, {
+                    id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                    type: asset.media_type === 'image' ? 'video' : (asset.media_type as any),
+                    filePath: asset.file_path,
+                    fileName: asset.file_name,
+                    startTime,
+                    duration: asset.duration_seconds || 5,
+                    inPoint: 0,
+                    outPoint: asset.duration_seconds || 5,
+                    thumbnailUrl: asset.thumbnail_url || undefined,
+                    isImage: asset.media_type === 'image',
+                  });
+                }}
+              >
                 {track.clips.map((clip) => (
                   <ClipBlock
                     key={clip.id}
@@ -417,6 +540,7 @@ export default function Timeline() {
                     isSelected={selectedClipId === clip.id}
                     onSelect={() => selectClip(clip.id)}
                     onMove={(newStart) => moveClip(clip.id, newStart)}
+                    onTrim={(newIn, newOut, newStart) => trimClip(clip.id, newIn, newOut, newStart)}
                     onContextMenu={(e) => setContextMenu({ x: e.clientX, y: e.clientY, clipId: clip.id })}
                   />
                 ))}

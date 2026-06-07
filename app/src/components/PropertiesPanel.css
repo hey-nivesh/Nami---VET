@@ -166,3 +166,40 @@
 .property-select option {
   background: var(--bg-panel);
 }
+
+/* ── Layer Order Buttons ── */
+.properties-clip-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--border-color);
+  gap: 8px;
+}
+
+.properties-layer-btns {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.properties-layer-btns .btn-icon {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.properties-layer-btns .btn-icon:hover {
+  background: rgba(255, 140, 0, 0.15);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
